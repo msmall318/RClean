@@ -19,13 +19,19 @@ cols <- 2:18
 unmerged_data[,cols] %<>% lapply(function(x) as.numeric(as.character(x)))
 
 #Sum the observations
-colstomerge <- c(2,7,8,14)
-unmerged_data[,"Army"] <- unmerged_data[colstomerge] %>% rowSums()
-#Delete the unneeded columns
-unmerged_data <- unmerged_data[,-colstomerge]
+colstomerge_army <- colnames(unmerged_data) %>% grepl("army",.,ignore.case=TRUE)
+colstomerge_navy <- colnames(unmerged_data) %>% grepl("navy",.,ignore.case=TRUE)
+colstomerge_marine <- colnames(unmerged_data) %>% grepl("marine",.,ignore.case=TRUE)
+colstomerge_airforce <- colnames(unmerged_data) %>% grepl("air",.,ignore.case=TRUE)
 
-#Create a toy data set to practice reshaping
-unmerged_data <- unmerged_data[,c(1,2,15)]
+#Create temporary data frame
+temp <- data.frame(matrix(ncol = 0, nrow = nrow(unmerged_data)))
+temp[,"Army"] <- unmerged_data[colstomerge_army] %>% rowSums()
+temp[,"Navy"] <- unmerged_data[colstomerge_navy] %>% rowSums()
+temp[,"MarineCorps"] <- unmerged_data[colstomerge_marine] %>% rowSums()
+temp[,"AirForce"] <- unmerged_data[colstomerge_airforce] %>% rowSums()
+#Delete the unneeded columns
+unmerged_data <- cbind(unmerged_data[,1],temp)
 
 #Add a variable for the data set (when data was retrieved)
 unmerged_data[,"Year"] <- as.Date("1sep2017","%d%b%Y")
@@ -33,7 +39,6 @@ unmerged_data[,"Year"] <- as.Date("1sep2017","%d%b%Y")
 #Make Variables Title Case (need stringi) 
 #(this may be optional and not needed, but would improve consistency for my example)
 colnames(unmerged_data) <- colnames(unmerged_data) %>%
-  str_to_title() %>%
   stri_replace_all_fixed(., " ", "") %>% 
   stri_replace_all_charclass(., "\\p{WHITE_SPACE}", "")
 
@@ -46,5 +51,8 @@ unmerged_data$Country <- unmerged_data$Country %>%
 
 #Time to tidy (library tidyr)
 unmerged_data <- unmerged_data %>% 
-  gather(., Service, Personnel, c(Navy,Army), factor_key=TRUE)
+  gather(., Service, Personnel, c(Navy,Army,MarineCorps,AirForce), factor_key=TRUE)
+
+rm(list = ls(pattern = "col"),temp)
+
 
