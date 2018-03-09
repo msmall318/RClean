@@ -53,7 +53,7 @@ colnames(unmerged_data) <- colnames(unmerged_data) %>%
 unmerged_data$Country <- unmerged_data$Country %>% 
   str_to_title() %>% str_trim()
 
-#Convert Country Names
+#Convert Country Name
 countrycode(unmerged_data$Country,origin="country.name",destination = "iso3c")
 
 #Time to tidy (library tidyr)
