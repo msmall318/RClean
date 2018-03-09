@@ -23,6 +23,8 @@ colstomerge_army <- colnames(unmerged_data) %>% grepl("army",.,ignore.case=TRUE)
 colstomerge_navy <- colnames(unmerged_data) %>% grepl("navy",.,ignore.case=TRUE)
 colstomerge_marine <- colnames(unmerged_data) %>% grepl("marine",.,ignore.case=TRUE)
 colstomerge_airforce <- colnames(unmerged_data) %>% grepl("air",.,ignore.case=TRUE)
+colstomerge_coast <- colnames(unmerged_data) %>% grepl("coast",.,ignore.case=TRUE)
+colstomerge_estate <- colnames(unmerged_data) %>% grepl("estate",.,ignore.case=TRUE)
 
 #Create temporary data frame
 temp <- data.frame(matrix(ncol = 0, nrow = nrow(unmerged_data)))
@@ -30,6 +32,8 @@ temp[,"Army"] <- unmerged_data[colstomerge_army] %>% rowSums()
 temp[,"Navy"] <- unmerged_data[colstomerge_navy] %>% rowSums()
 temp[,"MarineCorps"] <- unmerged_data[colstomerge_marine] %>% rowSums()
 temp[,"AirForce"] <- unmerged_data[colstomerge_airforce] %>% rowSums()
+temp[,"CoastGuard"] <- unmerged_data[colstomerge_coast] %>% rowSums()
+temp[,"4thEstate(DOD)"] <- unmerged_data[colstomerge_estate] %>% rowSums()
 #Delete the unneeded columns
 unmerged_data <- cbind(unmerged_data[,1],temp)
 
@@ -49,9 +53,12 @@ colnames(unmerged_data) <- colnames(unmerged_data) %>%
 unmerged_data$Country <- unmerged_data$Country %>% 
   str_to_title() %>% str_trim()
 
+#Convert Country Names
+countrycode(unmerged_data$Country,origin="country.name",destination = "iso3c")
+
 #Time to tidy (library tidyr)
 unmerged_data <- unmerged_data %>% 
-  gather(., Service, Personnel, c(Navy,Army,MarineCorps,AirForce), factor_key=TRUE)
+  gather(., Service, Personnel, c(Navy,Army,MarineCorps,AirForce,`4thEstate(DOD)`,CoastGuard), factor_key=TRUE)
 
 rm(list = ls(pattern = "col"),temp)
 
